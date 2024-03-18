@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Sample XML Query</title>
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+        var interval = null;
+        var date;
+        date = new Date();
+        date = date.getUTCFullYear() + '-' +
+            ('00' + (date.getUTCMonth() + 1)).slice(-2) + '-' +
+            ('00' + date.getUTCDate()).slice(-2);
+
+        function progress() {
+            var account = $("#account").val();
+            var password = $("#password").val();
+            document.getElementById("login").style.display = "none";
+            $.ajax({
+                url: "hw4.php",
+                type: "POST",
+                datatype: "html",
+                data: {
+                    account: account,
+                    password: password
+                },
+                success: function (output) {
+                    $("#out").html(output);
+                    $(".todo-item").each(function () {
+                        var item = $(this);
+                        var id = item.attr("data-id");
+                        var time = item.attr("data-time");
+                        if (time == date) {
+                            item.find('.todo-time').css('color', 'red');
+                        }
+                        item.find(".todo-delete").click(function () {
+                            if (interval)
+                                return;
+                            interval = 1;
+                            $.ajax({
+                                url: "delete.php",
+                                type: "POST",
+                                datatype: "html",
+                                data: {
+                                    account: account,
+                                    id: id
+
+                                },
+                                success: function (output) {
+                                    progress();
+                                    window.clearInterval(interval);
+                                    interval = null;
+
+
+
+
+                                },
+                                error: function () {
+                                    alert("Request failed.");
+                                }
+                            })
+                        })
+                        item.find(".todo-edit").click(function () {
+                            if (interval)
+                                return;
+                            interval = 1;
+                            $("#infor").append("<input id='id' type='text' placeholder='修改後的id'>");
+                            $("#infor").append("<input id='thing' type='text' placeholder='修改後要做的事'>");
+                            $("#infor").append("<input id='time' type='date' value='time' placeholder='修改後的時間'>");
+                            $("#infor").append("<input id='update'type='button' value='update' onclick=\"update('" + id + "')\">");
+
+
+
+                        })
+                    })
+                    $(".todo-insert").click(function () {
+                        if (interval)
+                            return;
+                        interval = 1;
+                        $("#infor").append("<input id='id' type='text' placeholder='新增id'>");
+                        $("#infor").append("<input id='thing' type='text' placeholder='新增做的事'>");
+                        $("#infor").append("<input id='time' type='date' value='time' placeholder='新增時間'>");
+                        $("#infor").append("<input id='insert'type='button' value='insert' onclick='insert()'>");
+
+                    })
+                },
+                error: function () {
+                    alert("Request failed.");
+                }
+            });
+        }
+        function update(oldid) {
+            var updateid = $("#id").val();
+            var updatething = $("#thing").val();
+            var updatetime = $('#time').val();
+            var account = $("#account").val();
+            var password = $("#password").val();
+            //var oldid = oldid;
+            $.ajax({
+                url: "update.php",
+                type: "POST",
+                datatype: "html",
+                data: {
+                    id: updateid,
+                    thing: updatething,
+                    time: updatetime,
+                    oldid: oldid
+                },
+                success: function (output) {
+                    $.ajax({
+
+                        url: "hw4.php",
+                        type: "POST",
+                        datatype: "html",
+                        data: {
+                            account: account,
+                            password: password
+                        },
+                        success: function (output) {
+                            $("#id").remove();
+                            $("#thing").remove();
+                            $("#time").remove();
+                            $("#update").remove();
+                            progress();
+                            window.clearInterval(interval);
+                            interval = null;
+
+
+                        },
+                        error: function () {
+                            alert("Request failed.");
+                        }
+                    })
+
+                    window.clearInterval(interval);
+                    interval = null;
+
+                },
+                error: function () {
+                    alert("Request failed.");
+                }
+            })
+
+        }
+        function insert() {
+            var inid = $("#id").val();
+            var inthing = $("#thing").val();
+            var intime = $('#time').val();
+            var account = $("#account").val();
+            var password = $("#password").val();
+            $.ajax({
+                url: "insert.php",
+                type: "POST",
+                datatype: "html",
+                data: {
+
+                    id: inid,
+                    thing: inthing,
+                    time: intime
+
+                },
+                success: function (output) {
+                    progress();
+                    $("#id").remove();
+                    $("#thing").remove();
+                    $("#time").remove();
+                    $("#insert").remove();
+                    //progress();
+                    window.clearInterval(interval);
+                    interval = null;
+
+
+                },
+                error: function () {
+                    alert("Request failed.");
+                }
+            })
+        }
+
+    </script>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: lightyellow;
+        }
+
+        table {
+            background-color: lightblue;
+            border-collapse: collapse;
+            border: 1px solid gray;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+        tr:nth-child(odd) {
+            background-color: white;
+        }
+
+        input.id {
+            position: absolute;
+            top: 80px;
+            right: 800px
+        }
+
+        div #infor {
+            top: 10px;
+            left: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>個人維護系統</h1>
+    <div id="login">
+        <form method="post" action="#">
+            <p><input id="account" type="text" placeholder="帳號"></p>
+            <p><input id="password" type="password" placeholder="密碼"></p>
+            <p><input id="submit" type="button" value="登入" onclick="progress()"></p>
+            <a href="creat.html">創建帳號</a>
+        </form>
+    </div>
+
+
+    <div id="out"></div>
+    <div id="infor" class="infor"></div>
+
+
+</body>
+
+</html>

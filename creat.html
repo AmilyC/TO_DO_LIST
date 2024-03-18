@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>hw4</title>
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+        function creat() {
+            var account = $("#account").val();
+            var password = $("#password").val();
+            var name = $("#name").val();
+            $.ajax({
+                url: "creat.php",
+                type: "POST",
+                data: {
+                    account: account,
+                    password: password,
+                    name: name
+                },
+                datatype: "html",
+                success: function (output) {
+                    $("#out").html(output);
+                },
+                error: function () {
+                    alert("Request failed.");
+                }
+            });
+        }
+    </script>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: lightyellow;
+        }
+
+        table {
+            background-color: lightblue;
+            border-collapse: collapse;
+            border: 1px solid gray;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+        tr:nth-child(odd) {
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>創建帳號</h1>
+    <form method="post" action="#">
+        <p><input id="account" type="text" placeholder="帳號大小寫英文字母和數字" pattern="[A-Za-z0-9]+"></p>
+        <p><input id="password" type="password" placeholder="密碼大小寫英文字母和數字" pattern="[A-Za-z0-9]+"></p>
+        <p><input id="name" type="text" placeholder="輸入姓名"></p>
+        <p><input id="submit" type="button" value="create" onclick="creat()"></p>
+    </form>
+    <div id=out></div>
+</body>
+
+</html>
